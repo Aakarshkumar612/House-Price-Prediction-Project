@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-g">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+        nav {
+            background: #1e1e1e;
+            padding: 15px 30px;
+            border-bottom: 1px solid #333;
+        }
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-right: 20px;
+        }
+        nav a.active {
+            color: #007bff;
+        }
+        #chat-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            max-width: 800px;
+            width: 90%;
+            margin: 20px auto;
+            padding-bottom: 20px;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 70%;
+            line-height: 1.4;
+        }
+        .message.user {
+            background-color: #333;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .message.bot {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        #chat-input-form {
+            display: flex;
+        }
+        #chat-input {
+            flex-grow: 1;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/">Predictor</a>
+        <a href="/chatpage" class="active">Chat AI</a>
+    </nav>
+
+    <div id="chat-wrapper">
+        <div id="chat-messages">
+            <div class="message bot">Hello! I am your real estate AI assistant. You can ask me about the Delhi market, or go to the "Predictor" page to get a specific price.</div>
+        </div>
+        <form id="chat-input-form">
+            <input type="text" id="chat-input" placeholder="Ask me anything about Delhi real estate..." required>
+        </form>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById("chat-messages");
+        const chatInputForm = document.getElementById("chat-input-form");
+        const chatInput = document.getElementById("chat-input");
+
+        // Handle sending a message
+        chatInputForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const message = chatInput.value;
+            if (!message) return;
+
+            addMessage(message, "user");
+            chatInput.value = "";
+
+            // --- THE RAG PART ---
+            // 1. Get the context from the browser's session storage
+            const context_price = sessionStorage.getItem("predicted_price") || "";
+            const context_features = JSON.parse(sessionStorage.getItem("predicted_features")) || {};
+            // --- END RAG PART ---
+
+            // 2. Send message AND context to the backend
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    message: message,
+                    context_price: context_price,
+                    context_features: context_features
+                })
+            });
+            
+            const result = await response.json();
+            const botResponse = result.response;
+
+            // 3. Display bot's response
+            addMessage(botResponse, "bot");
+        });
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerText = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
