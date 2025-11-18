@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-g">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat AI</title>
     <style>
@@ -14,10 +14,16 @@
             height: 100vh;
             margin: 0;
         }
+        
+        /* --- UPDATED NAV BAR STYLE --- */
         nav {
             background: #1e1e1e;
             padding: 15px 30px;
             border-bottom: 1px solid #333;
+            /* New styles to separate links and button */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         nav a {
             color: #e0e0e0;
@@ -29,6 +35,21 @@
         nav a.active {
             color: #007bff;
         }
+        
+        /* --- NEW BUTTON STYLE --- */
+        #toggle-voice-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* Makes the emoji bigger */
+            color: #e0e0e0;
+            cursor: pointer;
+            padding: 0;
+        }
+        #toggle-voice-btn:hover {
+            color: #007bff;
+        }
+        
+        /* --- REST OF YOUR CSS --- */
         #chat-wrapper {
             flex-grow: 1;
             display: flex;
@@ -81,8 +102,13 @@
 <body>
 
     <nav>
-        <a href="/">Predictor</a>
-        <a href="/chatpage" class="active">Chat AI</a>
+        <div>
+            <a href="/">Predictor</a>
+            <a href="/chatpage" class="active">Chat AI</a>
+        </div>
+        <div>
+            <button id="toggle-voice-btn" title="Toggle Voice">🔈</button>
+        </div>
     </nav>
 
     <div id="chat-wrapper">
@@ -98,6 +124,27 @@
         const chatMessages = document.getElementById("chat-messages");
         const chatInputForm = document.getElementById("chat-input-form");
         const chatInput = document.getElementById("chat-input");
+        
+        // --- NEW: Voice Toggle Logic ---
+        const toggleVoiceBtn = document.getElementById("toggle-voice-btn");
+        let isVoiceEnabled = true; // Voice is ON by default
+
+        toggleVoiceBtn.addEventListener("click", () => {
+            // Toggle the state
+            isVoiceEnabled = !isVoiceEnabled;
+            
+            if (isVoiceEnabled) {
+                toggleVoiceBtn.innerText = "🔈"; // "Sound on" icon
+                toggleVoiceBtn.title = "Turn Voice Off";
+            } else {
+                toggleVoiceBtn.innerText = "🔇"; // "Muted" icon
+                toggleVoiceBtn.title = "Turn Voice On";
+                // If we just turned it off, stop any speech
+                window.speechSynthesis.cancel();
+            }
+        });
+        // --- END: Voice Toggle Logic ---
+
 
         // Handle sending a message
         chatInputForm.addEventListener("submit", async (event) => {
@@ -108,13 +155,9 @@
             addMessage(message, "user");
             chatInput.value = "";
 
-            // --- THE RAG PART ---
-            // 1. Get the context from the browser's session storage
             const context_price = sessionStorage.getItem("predicted_price") || "";
-            const context_features = JSON.parse(sessionStorage.getItem("predicted_features")) || {};
-            // --- END RAG PART ---
+            const context_features = JSON.parse(sessionStorage.getItem("predicted_features") || "{}");
 
-            // 2. Send message AND context to the backend
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -128,16 +171,38 @@
             const result = await response.json();
             const botResponse = result.response;
 
-            // 3. Display bot's response
             addMessage(botResponse, "bot");
         });
 
+        // This function adds the message to the chat window
         function addMessage(text, sender) {
             const messageDiv = document.createElement("div");
             messageDiv.className = `message ${sender}`;
             messageDiv.innerText = text;
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // This is the "asterisk" fix from before
+            if (sender === 'bot') {
+                const cleanText = text.replace(/[*_~`]/g, "");
+                
+                // --- NEW: Check if voice is enabled before speaking ---
+                if (isVoiceEnabled) {
+                    speak(cleanText);
+                }
+            }
+        }
+
+        // This function speaks the text
+        function speak(text) {
+            try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = "en-US"; 
+                window.speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.error("Speech synthesis failed:", error);
+            }
         }
     </script>
 

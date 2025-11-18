@@ -10,8 +10,6 @@
 
     <style>
         body { font-family: Arial, sans-serif; margin: 0; }
-        
-        /* --- NEW NAV BAR STYLE --- */
         nav {
             background: #f4f4f4;
             padding: 15px 30px;
@@ -27,17 +25,13 @@
         nav a.active {
             color: #007bff;
         }
-        /* --- END NAV BAR STYLE --- */
-
         .container { display: flex; width: 100%; gap: 20px; padding: 20px; }
-        
         #map { 
             height: 500px; 
             width: 60%;
             border: 1px solid #ccc;
             border-radius: 8px;
         }
-
         .form-container { width: 40%; }
         h1 { text-align: center; }
         form { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
@@ -45,8 +39,6 @@
         input { padding: 8px; }
         button { grid-column: 2; padding: 10px; cursor: pointer; }
         h2 { text-align: center; margin-top: 30px; }
-
-        /* --- ALL CHATBOT CSS IS GONE --- */
     </style>
 </head>
 <body>
@@ -55,6 +47,7 @@
         <a href="/" class="active">Predictor</a>
         <a href="/chatpage">Chat AI</a>
     </nav>
+
     <div class="container">
         <div id="map"></div>
         <div class="form-container">
@@ -77,20 +70,37 @@
     </div>
 
     <script>
-        // --- MAP SCRIPT (Same as before) ---
+        // --- MAP SCRIPT ---
         const initialLat = 28.6139;
         const initialLng = 77.2090;
         const latInput = document.getElementById("latitude");
         const lngInput = document.getElementById("longitude");
-        const map = L.map('map').setView([initialLat, initialLng], 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-        latInput.value = initialLat;
-        lngInput.value = initialLng;
-        marker.on('dragend', function(e) { /* ... */ });
-        map.on('click', function(e) { /* ... */ });
 
-        // --- PREDICTION SCRIPT (Slightly updated) ---
+        const map = L.map('map').setView([initialLat, initialLng], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const marker = L.marker([initialLat, initialLng], {
+            draggable: true
+        }).addTo(map);
+
+        latInput.value = initialLat.toFixed(6);
+        lngInput.value = initialLng.toFixed(6);
+
+        marker.on('dragend', function(event) {
+            const position = marker.getLatLng();
+            latInput.value = position.lat.toFixed(6);
+            lngInput.value = position.lng.toFixed(6);
+        });
+        
+        map.on('click', function(event) {
+            const position = event.latlng;
+            marker.setLatLng(position);
+            latInput.value = position.lat.toFixed(6);
+            lngInput.value = position.lng.toFixed(6);
+        });
+
+        // --- PREDICTION SCRIPT ---
         const form = document.getElementById("prediction-form");
         const resultText = document.getElementById("result-text");
         
@@ -118,13 +128,9 @@
             const priceString = `Predicted Price: ${price} Lakhs`;
             resultText.innerText = priceString;
 
-            // --- NEW: SAVE CONTEXT TO SESSION STORAGE ---
             sessionStorage.setItem("predicted_price", priceString);
             sessionStorage.setItem("predicted_features", JSON.stringify(data));
-            // --- END NEW PART ---
         });
-        
-        // --- ALL CHATBOT JAVASCRIPT IS GONE ---
     </script>
 
 </body>

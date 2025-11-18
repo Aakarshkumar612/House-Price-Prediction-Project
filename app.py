@@ -1,21 +1,31 @@
+import os
+import numpy as np
+import joblib
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-import joblib
-import numpy as np
+from dotenv import load_dotenv
 
-# Create a new FastAPI app
+# --- NEW: Gemini AI Setup ---
+import google.generativeai as genai
+
+# --- Load API Key from .env file ---
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    print("--- ERROR: GEMINI_API_KEY not found. Please check your .env file. ---")
+else:
+    # --- 3. Configure the Gemini "Brain" ---
+    genai.configure(api_key=GEMINI_API_KEY)
+
+# --- Standard FastAPI Setup ---
 app = FastAPI()
-
-# --- TEMPLATING SETUP ---
 templates = Jinja2Templates(directory="templates")
-
-# --- 1. Load your prediction model ---
 model = joblib.load("house_model.pkl")
 
-# --- 2. Define Pydantic Models (Data Structures) ---
-
-# This is for your prediction model
+# --- Pydantic Models (Data Contracts) ---
+# These are the same as before
 class HouseData(BaseModel):
     latitude: float
     longitude: float
@@ -23,28 +33,25 @@ class HouseData(BaseModel):
     Bedrooms: int
     Bathrooms: int
 
-# --- NEW: This is for your chatbot ---
-class ChatMessage(BaseModel):
+class ChatRequest(BaseModel):
     message: str
+    context_price: str = "" 
+    context_features: dict = {}
 
-# --- 3. Define API Endpoints ---
-
-# Root route to serve the HTML page
+# --- Frontend Page Routes ---
+# These are the same as before
 @app.get("/")
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Add this new route to your app.py
 @app.get("/chatpage")
 def get_chat_page(request: Request):
-    # This will find chat.html in the 'templates' folder
     return templates.TemplateResponse("chat.html", {"request": request})
 
-# Prediction route (same as before)
+# --- API Endpoints ---
+# This is the same as before
 @app.post("/predict")
 def predict_price(data: HouseData):
-    
-    # Convert input data to a numpy array
     input_data = np.array([[
         data.latitude, 
         data.longitude, 
@@ -52,42 +59,44 @@ def predict_price(data: HouseData):
         data.Bedrooms, 
         data.Bathrooms
     ]])
-    
-    # Make a prediction (this is in raw INR)
     prediction_inr = model.predict(input_data)[0]
-    
-    # Convert INR to Lakhs
     prediction_in_lakhs = prediction_inr / 100000.0
-    
-    # Return the converted prediction
     return {"predicted_price_in_lakhs": prediction_in_lakhs}
 
-# --- NEW: Chatbot route ---
+
+# --- NEW: This is the "Gemini Brain" ---
 @app.post("/chat")
-def handle_chat(chat_message: ChatMessage):
-    user_message = chat_message.message.lower() # Convert to lowercase
+def handle_chat(chat_request: ChatRequest):
     
-    # --- THE FIX ---
-    # Split the message into a list of individual words
-    words = user_message.split()
+    # 1. Create the "Augmentation" (the RAG part)
+    system_prompt = f"""
+    You are a polite, expert real estate AI assistant for the Delhi market.
+    Your knowledge comes from a machine learning model.
     
-    # Now, check if the *word* "hi" or "hello" is in the list.
-    # This won't be fooled by "delhi" anymore.
-    if "hello" in words or "hi" in words:
-        bot_response = "Hi there! How can I help you with your house price prediction?"
+    Here is the CURRENT CONTEXT from the user's prediction (if any):
+    - Predicted Price: {chat_request.context_price}
+    - Property Features: {chat_request.context_features}
     
-    # --- The rest of the rules ---
-    # We use 'in user_message' here, which is fine for longer keywords
-    elif "how are you" in user_message:
-        bot_response = "I'm just a set of rules, but I'm happy to help!"
-    elif "price" in user_message or "predict" in user_message:
-        bot_response = "To get a price, please drag the marker on the map and fill in the form with the area, bedrooms, and bathrooms. Then click 'Predict Price'!"
-    elif "data" in user_message or "model" in user_message:
-        bot_response = "This model is trained on a dataset of real house listings from Delhi, using a Random Forest algorithm."
-    elif "bye" in user_message or "thanks" in user_message:
-        bot_response = "Goodbye! Happy to help."
-    else:
-        bot_response = "Sorry, I don't understand that. You can ask me about the price, the data, or the model."
+    Use this context to answer the user's question.
+    If the context is empty, just have a friendly, general conversation.
+    """
     
+    # 2. Initialize the Gemini Model
+    # We use 'gemini-1.5-flash' for speed
+    model = genai.GenerativeModel('gemini-pro-latest')
+    
+    # 3. Create the chat session with our RAG prompt
+    chat = model.start_chat(history=[
+        {'role': 'user', 'parts': [system_prompt]},
+        {'role': 'model', 'parts': ["Understood. I am a helpful real estate AI. I will use the context provided."]},
+    ])
+    
+    # 4. Send the user's message to Gemini
+    try:
+        response = chat.send_message(chat_request.message)
+        bot_response = response.text
+    except Exception as e:
+        print(f"--- Gemini API Error ---: {e}")
+        bot_response = "Sorry, I'm having a little trouble connecting to my brain right now. Please check my API key or try again in a moment."
+
     return {"response": bot_response}
-   
