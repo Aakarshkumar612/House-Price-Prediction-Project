@@ -3,208 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat AI</title>
+    <title>UrbanEstimator - Chat AI</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        /* --- Base & Global Styles --- */
+        :root {
+            /* Light Mode Defaults */
+            --bg-body: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #1e1e1e;
+            --text-secondary: #4b5563;
+            --border-color: #e0e0e0;
+            --input-bg: #ffffff;
+        }
+
+        .dark {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --input-bg: #2d3748;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-primary); 
+            transition: background-color 0.3s, color 0.3s;
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+        }
+
+        .chat-container { 
+            max-width: 800px; 
+            width: 90%; 
+            margin: 2rem auto; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .chat-messages { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 1rem; 
+            background-color: var(--bg-card); 
+            border-radius: 0.75rem 0.75rem 0 0; 
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
+            height: 500px; /* Fixed height for chat area */
+        }
+
+        .message-user { 
+            background-color: #dbeafe; /* Tailwind blue-100 */
+            color: var(--text-primary); 
+            align-self: flex-end; 
+        } 
+
+        .dark .message-user {
+            background-color: #374151; /* Tailwind gray-700 */
             color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            margin: 0;
         }
         
-        /* --- UPDATED NAV BAR STYLE --- */
-        nav {
-            background: #1e1e1e;
-            padding: 15px 30px;
-            border-bottom: 1px solid #333;
-            /* New styles to separate links and button */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .message-bot { 
+            background-color: #f1f3f4; /* Very light gray */
+            color: var(--text-primary); 
+            align-self: flex-start; 
         }
-        nav a {
+
+        .dark .message-bot {
+            background-color: #2d3748; /* Darker gray for contrast */
             color: #e0e0e0;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-right: 20px;
         }
-        nav a.active {
-            color: #007bff;
+
+        #chat-input { 
+            background-color: var(--input-bg) !important; 
+            border: 1px solid var(--border-color) !important; 
+            color: var(--text-primary) !important;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
-        
-        /* --- NEW BUTTON STYLE --- */
-        #toggle-voice-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem; /* Makes the emoji bigger */
-            color: #e0e0e0;
+
+        /* --- Toggle Switch Styling --- */
+        .toggle-switch input[type="checkbox"] {
+            display: none;
+        }
+        .toggle-switch label {
             cursor: pointer;
-            padding: 0;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 10px;
+            position: relative;
+            display: block;
+            transition: background-color 0.3s;
         }
-        #toggle-voice-btn:hover {
-            color: #007bff;
+        .toggle-switch label:after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
         }
-        
-        /* --- REST OF YOUR CSS --- */
-        #chat-wrapper {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            max-width: 800px;
-            width: 90%;
-            margin: 20px auto;
-            padding-bottom: 20px;
+        .toggle-switch input:checked + label {
+            background-color: #3b82f6; /* Tailwind blue-500 */
         }
-        #chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 18px;
-            border-radius: 18px;
-            max-width: 70%;
-            line-height: 1.4;
-        }
-        .message.user {
-            background-color: #333;
-            color: #fff;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .message.bot {
-            background-color: #2a2a2a;
-            color: #e0e0e0;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        #chat-input-form {
-            display: flex;
-        }
-        #chat-input {
-            flex-grow: 1;
-            border: 1px solid #444;
-            background: #2a2a2a;
-            color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1em;
+        .toggle-switch input:checked + label:after {
+            transform: translateX(20px);
         }
     </style>
 </head>
-<body>
-
-    <nav>
-        <div>
-            <a href="/">Predictor</a>
-            <a href="/chatpage" class="active">Chat AI</a>
+<body class="min-h-screen">
+    <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-sm flex justify-between items-center relative">
+        <div class="flex space-x-6">
+            <span class="text-xl font-extrabold text-blue-600 dark:text-blue-400">UrbanEstimator</span>
+            <a href="/" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150">Predictor</a>
+            <a href="/chat" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150 border-b-2 border-blue-600 font-semibold">Chat AI</a>
         </div>
-        <div>
-            <button id="toggle-voice-btn" title="Toggle Voice">🔈</button>
-        </div>
+        
+        <!-- Dark Mode Toggle Button (Top Right) -->
+        <button id="theme-toggle" class="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+            <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun hidden">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon hidden">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+        </button>
     </nav>
 
-    <div id="chat-wrapper">
-        <div id="chat-messages">
-            <div class="message bot">Hello! I am your real estate AI assistant. You can ask me about the Delhi market, or go to the "Predictor" page to get a specific price.</div>
+    <div class="chat-container">
+        <!-- New Toggle for Voice Assistant -->
+        <div class="flex items-center justify-end mb-3 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg gemini-card">
+            <span class="text-sm text-secondary mr-3">Voice Assistant ON/OFF</span>
+            <div class="toggle-switch">
+                <input type="checkbox" id="voice-toggle-checkbox" checked>
+                <label for="voice-toggle-checkbox"></label>
+            </div>
         </div>
-        <form id="chat-input-form">
-            <input type="text" id="chat-input" placeholder="Ask me anything about Delhi real estate..." required>
+
+        <div id="chat-messages" class="chat-messages space-y-4 shadow-lg">
+            <!-- Initial Bot Message -->
+            <div class="flex justify-start">
+                <div class="message-bot p-3 rounded-xl rounded-tl-none max-w-md shadow-sm">
+                    Hello! I am your real estate AI assistant. The voice feature is currently **ON**. Click the microphone icon to speak.
+                </div>
+            </div>
+        </div>
+
+        <form id="chat-input-form" class="flex p-4 bg-white dark:bg-gray-800 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-xl shadow-md space-x-2">
+            
+            <!-- Voice Button -->
+            <button type="button" id="voice-button" 
+                    class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200 flex items-center justify-center"
+                    title="Start Voice Input">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+            </button>
+            
+            <!-- Text Input -->
+            <input type="text" id="chat-input" placeholder="Ask UrbanEstimator anything..." required 
+                   class="flex-grow px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <!-- Send Button -->
+            <button type="submit" id="send-button"
+                    class="p-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-200 disabled:opacity-50">
+                Send
+            </button>
         </form>
+        <div id="status-message" class="text-center text-sm p-2 text-gray-600 dark:text-gray-400 hidden"></div>
     </div>
 
     <script>
         const chatMessages = document.getElementById("chat-messages");
         const chatInputForm = document.getElementById("chat-input-form");
         const chatInput = document.getElementById("chat-input");
-        
-        // --- NEW: Voice Toggle Logic ---
-        const toggleVoiceBtn = document.getElementById("toggle-voice-btn");
-        let isVoiceEnabled = true; // Voice is ON by default
+        const sendButton = document.getElementById("send-button");
+        const voiceButton = document.getElementById("voice-button");
+        const statusMessage = document.getElementById("status-message");
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const voiceToggleCheckbox = document.getElementById('voice-toggle-checkbox');
 
-        toggleVoiceBtn.addEventListener("click", () => {
-            // Toggle the state
-            isVoiceEnabled = !isVoiceEnabled;
-            
-            if (isVoiceEnabled) {
-                toggleVoiceBtn.innerText = "🔈"; // "Sound on" icon
-                toggleVoiceBtn.title = "Turn Voice Off";
-            } else {
-                toggleVoiceBtn.innerText = "🔇"; // "Muted" icon
-                toggleVoiceBtn.title = "Turn Voice On";
-                // If we just turned it off, stop any speech
-                window.speechSynthesis.cancel();
+        // --- TTS (Text-to-Speech) Logic ---
+        const speaker = window.speechSynthesis;
+        function speakResponse(text) {
+            // Check if the TTS toggle is ON
+            if (!voiceToggleCheckbox.checked) {
+                return; 
             }
+
+            if (speaker.speaking) {
+                // If it's currently speaking, cancel existing speech before starting new
+                speaker.cancel(); 
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; // Set language for better voice selection
+
+            // Note: If you want a specific voice, use speaker.getVoices() 
+            // and assign one to utterance.voice here.
+            
+            speaker.speak(utterance);
+        }
+
+        // --- DARK MODE LOGIC ---
+        function applyTheme(isDark) {
+            document.body.classList.toggle('dark', isDark);
+            sunIcon.classList.toggle('hidden', isDark);
+            moonIcon.classList.toggle('hidden', !isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
+            applyTheme(isDark);
+            
+            // Initialize voice button state based on checkbox
+            voiceButton.disabled = !voiceToggleCheckbox.checked;
+            
+            // Initial speak for the first message
+            const initialMessage = chatMessages.querySelector('.message-bot').textContent.trim();
+            speakResponse(initialMessage);
         });
-        // --- END: Voice Toggle Logic ---
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.contains('dark');
+            applyTheme(!isDark);
+        });
 
 
-        // Handle sending a message
-        chatInputForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const message = chatInput.value;
-            if (!message) return;
+        // --- Core Chat Functions ---
+        function addMessage(text, sender) {
+            const flexDiv = document.createElement("div");
+            flexDiv.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const messageDiv = document.createElement("div");
+            const senderClass = sender === 'user' ? 'message-user rounded-br-none' : 'message-bot rounded-tl-none';
+            messageDiv.className = `p-3 rounded-xl max-w-md shadow-sm ${senderClass}`;
+            messageDiv.innerText = text;
+            
+            flexDiv.appendChild(messageDiv);
+            chatMessages.appendChild(flexDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // If it's the bot's message, speak it aloud
+            if (sender === 'bot') {
+                speakResponse(text);
+            }
+        }
 
+        async function sendMessage(message) {
             addMessage(message, "user");
             chatInput.value = "";
+            sendButton.disabled = true;
+            voiceButton.disabled = true;
 
-            const context_price = sessionStorage.getItem("predicted_price") || "";
+            const context_price = sessionStorage.getItem("predicted_price") || "No prediction made yet.";
             const context_features = JSON.parse(sessionStorage.getItem("predicted_features") || "{}");
 
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    message: message,
-                    context_price: context_price,
-                    context_features: context_features
-                })
-            });
-            
-            const result = await response.json();
-            const botResponse = result.response;
+            try {
+                // Temporary loading message
+                const tempLoadingDiv = document.createElement("div");
+                tempLoadingDiv.className = "flex justify-start";
+                tempLoadingDiv.innerHTML = '<div class="message-bot p-3 rounded-xl rounded-tl-none max-w-md shadow-sm opacity-70">...</div>';
+                chatMessages.appendChild(tempLoadingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            addMessage(botResponse, "bot");
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        message: message,
+                        context_price: context_price,
+                        context_features: context_features
+                    })
+                });
+                
+                // Remove loading message
+                chatMessages.removeChild(tempLoadingDiv);
+
+                const result = await response.json();
+                // TTS is triggered inside addMessage when sender is 'bot'
+                addMessage(result.response, "bot"); 
+
+            } catch (error) {
+                // Remove loading message on error
+                chatMessages.removeChild(chatMessages.lastChild);
+                addMessage("Sorry, I couldn't connect to the server or the AI. Please try again.", "bot");
+                console.error("Chat error:", error);
+            } finally {
+                sendButton.disabled = false;
+                voiceButton.disabled = !voiceToggleCheckbox.checked; 
+            }
+        }
+
+        chatInputForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+                sendMessage(message);
+            }
         });
 
-        // This function adds the message to the chat window
-        function addMessage(text, sender) {
-            const messageDiv = document.createElement("div");
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerText = text;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // This is the "asterisk" fix from before
-            if (sender === 'bot') {
-                const cleanText = text.replace(/[*_~`]/g, "");
-                
-                // --- NEW: Check if voice is enabled before speaking ---
-                if (isVoiceEnabled) {
-                    speak(cleanText);
+        // --- Voice Input (Speech Recognition) Logic ---
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+
+            recognition.continuous = false; 
+            recognition.interimResults = false; 
+
+            function updateStatus(text, isError = false) {
+                statusMessage.innerText = text;
+                statusMessage.classList.remove('hidden', 'text-red-600', 'text-gray-600', 'dark:text-gray-400');
+                if (isError) {
+                    statusMessage.classList.add('text-red-600');
+                } else {
+                    statusMessage.classList.add('text-gray-600', 'dark:text-gray-400');
                 }
             }
-        }
+            
+            // --- Voice Toggle Handler ---
+            voiceToggleCheckbox.addEventListener('change', () => {
+                const isEnabled = voiceToggleCheckbox.checked;
+                voiceButton.disabled = !isEnabled;
+                if (!isEnabled) {
+                    // Stop speaking and listening when disabled
+                    if (speaker.speaking) speaker.cancel();
+                    if (recognition) recognition.abort(); 
+                    
+                    updateStatus("Voice Assistant is OFF.", false);
+                    setTimeout(() => statusMessage.classList.add('hidden'), 3000);
+                } else {
+                    statusMessage.classList.add('hidden');
+                }
+            });
 
-        // This function speaks the text
-        function speak(text) {
-            try {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = "en-US"; 
-                window.speechSynthesis.speak(utterance);
-            } catch (error) {
-                console.error("Speech synthesis failed:", error);
-            }
+
+            voiceButton.addEventListener('click', () => {
+                if (!voiceToggleCheckbox.checked) return; 
+                
+                try {
+                    recognition.start();
+                    voiceButton.classList.add('animate-pulse', 'bg-blue-700'); 
+                    sendButton.disabled = true; 
+                    updateStatus("Listening... Speak now.", false);
+                } catch (e) {
+                    console.error(e);
+                    updateStatus("Microphone error. Ensure permission is granted.", true);
+                }
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                chatInput.value = transcript;
+                updateStatus(`Transcribed: "${transcript}". Sending...`, false);
+                // Automatically send the message after transcription
+                if (transcript) {
+                    sendMessage(transcript);
+                }
+            };
+
+            recognition.onspeechend = () => {
+                // The recognition engine stops itself shortly after speechend
+                updateStatus("Speech ended. Processing...", false);
+            };
+
+            recognition.onerror = (event) => {
+                voiceButton.classList.remove('animate-pulse', 'bg-blue-700');
+                voiceButton.disabled = !voiceToggleCheckbox.checked; 
+                sendButton.disabled = false;
+                if (event.error !== 'no-speech') {
+                    updateStatus(`Voice Error: ${event.error}`, true);
+                } else {
+                    updateStatus("No speech detected.", false);
+                }
+            };
+
+            recognition.onend = () => {
+                voiceButton.classList.remove('animate-pulse', 'bg-blue-700');
+                voiceButton.disabled = !voiceToggleCheckbox.checked; 
+                sendButton.disabled = false;
+                // Only hide status if it's not showing a persistent error
+                if (!statusMessage.classList.contains('text-red-600')) {
+                    statusMessage.classList.add('hidden');
+                }
+            };
+
+        } else {
+            // Handle browsers that do not support the Web Speech API
+            voiceToggleCheckbox.disabled = true;
+            voiceButton.disabled = true;
+            statusMessage.classList.remove('hidden');
+            statusMessage.innerText = "Voice input is not supported by your web browser.";
         }
     </script>
-
 </body>
 </html>
