@@ -1,7 +1,6 @@
-# House-Price-Prediction-Project #
-"AI-Powered House Price Predictor"
-=======
-# 🏠 AI-Powered House Price Predictor
+# House-Price-Prediction-Project 
+
+# 🏠 AI-Powered House Price Predictor 
 
 This is a full-stack web application that predicts house prices in Delhi using a machine learning model and features an interactive map and an AI chatbot assistant.
 
