@@ -1,0 +1,16 @@
+/* This file is a placeholder. 
+Any custom CSS that you want to apply across multiple HTML pages 
+(like custom fonts or complex layouts that Tailwind can't handle easily) 
+should be placed here.
+*/
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+```
+
+Then, you would need to link this in your HTML:
+
+```html
+<!-- Inside the <head> of index.html, predictor.html, and chat.html -->
+<link rel="stylesheet" href="/static/css/style.css">

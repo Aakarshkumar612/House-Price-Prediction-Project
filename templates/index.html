@@ -3,31 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UrbanEstimator - Predictor</title>
-    
-    <!-- Load Tailwind CSS -->
+    <title>UrbanEstimator | Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Leaflet for the map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Load Leaflet Geocoder for map search -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
-        /* --- Base & Global Styles --- */
+        /* --- Base & Global Styles (Copied for Consistency) --- */
         :root {
-            /* Light Mode Defaults */
             --bg-body: #f8f9fa;
             --bg-card: #ffffff;
             --text-primary: #1e1e1e;
             --text-secondary: #4b5563;
-            --border-color: #e0e0e0;
-            --input-bg: #ffffff;
         }
 
         .dark {
@@ -35,8 +21,6 @@
             --bg-card: #1e1e1e;
             --text-primary: #e0e0e0;
             --text-secondary: #9ca3af;
-            --border-color: #374151;
-            --input-bg: #2d3748;
         }
 
         body { 
@@ -44,98 +28,36 @@
             background-color: var(--bg-body); 
             color: var(--text-primary); 
             transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
         }
-        .gemini-card { 
-            background-color: var(--bg-card); 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        .leaflet-container { height: 100%; width: 100%; border-radius: 0.75rem; }
         
-        /* --- Search Bar Styling (FIXED LAYOUT) --- */
-        
-        /* Target the top-left control corner */
-        .leaflet-top.leaflet-left {
-            width: 100%;
-            padding: 10px; /* Add padding for the search bar */
-            box-sizing: border-box;
-        }
-
-        /* Make the Geocoder control expand horizontally */
-        .leaflet-control-geocoder {
-            max-width: none !important; 
-            width: 100% !important; 
-            margin: 0 !important; /* Remove internal margin */
-            background-color: var(--bg-card) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: 0.5rem !important;
+        .cta-button {
+            transition: all 0.2s ease-in-out;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
-        /* Ensure Geocoder input is styled correctly */
-        .leaflet-control-geocoder-form input {
-            padding: 10px 15px !important;
-            border-radius: 0.5rem !important;
-            font-size: 1rem !important;
-            width: 100% !important;
-            box-sizing: border-box; 
-            border: none !important;
-            background-color: var(--input-bg) !important; 
-            color: var(--text-primary) !important;
+        /* Dark mode adjustments for CTA buttons */
+        .dark .bg-gray-200 {
+            background-color: #374151; /* Darker gray for contrast */
+            color: #e0e0e0;
         }
-        
-        /* Hide the default search button icon */
-        .leaflet-control-geocoder-form button {
-            display: none !important;
-        }
-        
-        /* Ensure Geocoder results adopt dark mode colors */
-        .leaflet-control-geocoder .geocoder-control-selected,
-        .leaflet-control-geocoder .leaflet-control-geocoder-suggestion {
-            background-color: var(--bg-card);
-            color: var(--text-primary);
-        }
-        
-        /* --- Compass Control Styling --- */
-        .leaflet-control-compass {
-            /* Style for the custom control */
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-        .leaflet-control-compass button {
-            /* Button style */
-            background: none;
-            border: none;
-            padding: 8px;
-            display: block;
-            line-height: 1;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        /* Input Field Styling */
-        input:not([type="submit"]), label { transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
-        input:not([type="submit"]) { 
-            border: 1px solid var(--border-color) !important; 
-            background-color: var(--input-bg) !important; 
-            color: var(--text-primary) !important;
+        .dark .hover\:bg-gray-300:hover {
+            background-color: #4b5563;
         }
     </style>
 </head>
 <body class="min-h-screen">
+    <!-- Navigation Bar -->
     <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 shadow-sm flex justify-between items-center relative">
         <div class="flex space-x-6">
             <span class="text-xl font-extrabold text-blue-600 dark:text-blue-400">UrbanEstimator</span>
-            <a href="/" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150 border-b-2 border-blue-600 font-semibold">Predictor</a>
+            <!-- Home is active -->
+            <a href="/" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150 border-b-2 border-blue-600 font-semibold">Home</a>
+            <a href="/map" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150">Predictor</a>
             <a href="/chat" class="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition duration-150">Chat AI</a>
         </div>
         
-        <!-- Dark Mode Toggle Button (Top Right) -->
+        <!-- Dark Mode Toggle Button -->
         <button id="theme-toggle" class="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
             <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun hidden">
                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
@@ -146,107 +68,40 @@
         </button>
     </nav>
     
-    <div class="p-8 space-y-8 max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-gray-200">Property Valuation Tool</h1>
-        
-        <!-- The Geocoder will appear in the top-left corner of the map -->
-        <!-- We no longer need the empty search-bar-wrapper div -->
+    <!-- Hero Section -->
+    <main class="flex items-center justify-center min-h-[calc(100vh-64px)] p-4">
+        <div class="text-center max-w-4xl space-y-8">
+            <h1 class="text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                UrbanEstimator
+            </h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                **Predict the future of real estate.** Get instant, accurate property valuations and market insights powered by location and machine learning.
+            </p>
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Map Section -->
-            <div id="map-container" class="w-full lg:w-2/3 h-[500px] rounded-xl relative gemini-card">
-                <div id="map" class="leaflet-container"></div>
-                <!-- Lat/Lng Display overlay -->
-                <div class="absolute top-0 right-0 p-4 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 text-sm rounded-bl-xl z-[1001] text-gray-600 dark:text-gray-400">
-                    Lat: <span id="latitude-display" class="font-semibold">28.613900</span><br>
-                    Lng: <span id="longitude-display" class="font-semibold">77.209000</span>
-                </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-6 pt-4">
+                <a href="/map" class="cta-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-xl text-lg">
+                    Start Predicting Now
+                </a>
+                <a href="/chat" class="cta-button bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-bold py-4 px-10 rounded-xl text-lg">
+                    Chat with AI Assistant
+                </a>
             </div>
-
-            <!-- Form/Result Section -->
-            <div class="w-full lg:w-1/3 p-6 rounded-xl space-y-6 gemini-card">
-                
-                <form id="prediction-form" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Input Fields (Latitude and Longitude are auto-updated from map) -->
-                        <label for="latitude" class="text-secondary">Latitude:</label>
-                        <input type="number" id="latitude" name="latitude" step="any" required value="28.613900" class="text-primary p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500" readonly>
-                        
-                        <label for="longitude" class="text-secondary">Longitude:</label>
-                        <input type="number" id="longitude" name="longitude" step="any" required value="77.209000" class="text-primary p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500" readonly>
-                        
-                        <label for="Area" class="text-secondary">Area (sq. ft.):</label>
-                        <input type="number" id="Area" name="Area" required value="1000" min="100" class="text-primary p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        
-                        <label for="Bedrooms" class="text-secondary">Bedrooms (BHK):</label>
-                        <input type="number" id="Bedrooms" name="Bedrooms" required value="2" min="1" class="text-primary p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        
-                        <label for="Bathrooms" class="text-secondary">Bathrooms:</label>
-                        <input type="number" id="Bathrooms" name="Bathrooms" required value="2" min="1" class="text-primary p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        
-                        <button type="submit" id="predict-button"
-                            class="col-span-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mt-4">
-                            Predict Price
-                        </button>
-                    </div>
-                </form>
-                
-                <!-- Result Display Area -->
-                <h2 id="result-text" class="text-xl font-bold text-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-green-700 dark:text-green-400 hidden"></h2>
-
-                <!-- Investment Analysis Button -->
-                <button id="analysis-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 hidden">
-                    ✨ Get Investment Insight
-                </button>
-            </div>
+            
+            <p class="text-sm text-gray-400 dark:text-gray-500 pt-8">
+                Your data-driven partner in property investment.
+            </p>
         </div>
-
-        <!-- Investment Analysis Modal -->
-        <div id="analysis-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-[2000]">
-            <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-lg">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Investment Analysis</h2>
-                    <button id="close-modal" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-2xl">&times;</button>
-                </div>
-                <p id="analysis-content" class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap min-h-[100px]"></p>
-                <div id="analysis-loading" class="text-center text-blue-500 dark:text-blue-400 hidden">
-                    <svg class="animate-spin h-5 w-5 text-blue-500 dark:text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating insight...
-                </div>
-            </div>
-        </div>
-
-    </div>
+    </main>
 
     <script>
-        const initialLat = 28.6139;
-        const initialLng = 77.2090;
-        const latInput = document.getElementById("latitude");
-        const lngInput = document.getElementById("longitude");
-        const latDisplay = document.getElementById("latitude-display");
-        const lngDisplay = document.getElementById("longitude-display");
-        const resultText = document.getElementById("result-text");
-        const predictButton = document.getElementById("predict-button");
-        const analysisButton = document.getElementById("analysis-button");
-        const analysisModal = document.getElementById("analysis-modal");
-        const analysisContent = document.getElementById("analysis-content");
-        const analysisLoading = document.getElementById("analysis-loading");
         const themeToggle = document.getElementById('theme-toggle');
         const sunIcon = document.getElementById('sun-icon');
         const moonIcon = document.getElementById('moon-icon');
 
-        let lastPrediction = {}; 
-        let map;
-        let marker;
-
-        // --- DARK MODE LOGIC ---
+        // --- DARK MODE LOGIC (Consistent with other pages) ---
         function applyTheme(isDark) {
             document.body.classList.toggle('dark', isDark);
             
-            // Toggle icons based on the new theme state
             if (isDark) {
                 sunIcon.classList.add('hidden');
                 moonIcon.classList.remove('hidden');
@@ -256,253 +111,21 @@
             }
 
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            
-            // Invalidate map size to redraw Leaflet controls with new colors
-            if (map) {
-                map.invalidateSize(true);
-            }
         }
 
-        // --- MAP INITIALIZATION ---
-        function initMap() {
-            updateInputs(initialLat, initialLng); // Set initial values
-            map = L.map('map').setView([initialLat, initialLng], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(map);
-
-            marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-            
-            // --- 1. Geocoding Control (Search Bar - FIXED) ---
-            if (typeof L.Control.Geocoder !== 'undefined') {
-                const geocoder = L.Control.geocoder({
-                    defaultMarkGeocode: false, 
-                    placeholder: 'Search for location (e.g., New Delhi, India)',
-                    collapsed: false, // Keep it open
-                    position: 'topleft', 
-                    errorMessage: 'Location not found.'
-                }).addTo(map); // Add control directly to the map
-
-                // Handle search result selection
-                geocoder.on('markgeocode', function (e) {
-                    const center = e.geocode.center;
-                    map.setView(center, 16);
-                    marker.setLatLng(center);
-                    updateInputs(center.lat, center.lng);
-                    
-                    marker.bindPopup(e.geocode.name).openPopup();
-                });
-            }
-
-            // --- 2. Custom Compass/North Reset Control (Bottom Left - FIXED) ---
-            const CompassControl = L.Control.extend({
-                options: {
-                    position: 'bottomleft' // Position set to bottomleft
-                },
-                onAdd: function(map) {
-                    var container = L.DomUtil.create('div', 'leaflet-control-compass');
-                    container.innerHTML = `
-                        <button id="compass-btn" title="Reset North Orientation">
-                            &#x21EA; <!-- Unicode North Arrow -->
-                        </button>`;
-                    
-                    // Essential for click handling on custom Leaflet controls
-                    L.DomEvent.disableClickPropagation(container);
-                    L.DomEvent.on(container, 'contextmenu', L.DomEvent.preventDefault); 
-                    
-                    // Attach the click handler to the container element
-                    L.DomEvent.on(container, 'click', function(e) {
-                        L.DomEvent.preventDefault(e); 
-                        L.DomEvent.stopPropagation(e);
-
-                        // Reset map view to initial coordinates and zoom level (North is up)
-                        map.setView([initialLat, initialLng], 12, {
-                            animate: true,
-                            duration: 0.8
-                        });
-                        marker.setLatLng([initialLat, initialLng]); 
-                        updateInputs(initialLat, initialLng);
-                        
-                        console.log("Map reset to initial view.");
-                    });
-                    return container;
-                }
-            });
-            new CompassControl().addTo(map);
-
-            // --- 3. Map Handlers (Click/Drag) ---
-            marker.on('dragend', function(e) { 
-                updateInputs(marker.getLatLng().lat, marker.getLatLng().lng); 
-            });
-            map.on('click', function(e) { 
-                marker.setLatLng(e.latlng); 
-                updateInputs(e.latlng.lat, e.latlng.lng); 
-            });
-        }
-
-        // --- INITIALIZATION (Combined Listeners) ---
+        // Initialize theme on load
         document.addEventListener('DOMContentLoaded', () => {
-            // Theme Initialization
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
             applyTheme(isDark);
-            
-            // Map Initialization (called only once the DOM and theme are ready)
-            initMap();
-
-            // Attach event listener to theme toggle button
-            themeToggle.addEventListener('click', () => {
-                const isDark = document.body.classList.contains('dark');
-                applyTheme(!isDark);
-            });
         });
 
-
-        // --- UTILITY FUNCTIONS ---
-        function updateInputs(lat, lng) {
-            const fixedLat = lat.toFixed(6);
-            const fixedLng = lng.toFixed(6);
-            latInput.value = fixedLat;
-            lngInput.value = fixedLng;
-            latDisplay.textContent = fixedLat;
-            lngDisplay.textContent = fixedLng;
-            
-            // Store coordinates for chat context
-            sessionStorage.setItem("prediction_lat", fixedLat);
-            sessionStorage.setItem("prediction_lng", fixedLng);
-        }
-
-        function formatPrice(priceInLakhs) {
-            const lakh = 100000;
-            const crore = 100 * lakh;
-            const totalRupees = Math.round(priceInLakhs * lakh);
-
-            if (totalRupees < lakh) { return `₹${totalRupees.toLocaleString('en-IN')} only`; }
-            const crores = Math.floor(totalRupees / crore);
-            let remaining = totalRupees % crore;
-            const lakhs = Math.floor(remaining / lakh);
-            remaining = remaining % lakh;
-            const thousands = Math.floor(remaining / 1000);
-            const rupees = remaining % 1000;
-
-            let parts = [];
-            if (crores > 0) parts.push(`${crores} Crore`);
-            if (lakhs > 0) parts.push(`${lakhs} Lakh`);
-            if (thousands > 0) parts.push(`${thousands} Thousand`);
-            if (rupees > 0) parts.push(`${rupees} Rupees`);
-
-            return `₹${parts.join(' ')} only`;
-        }
-
-
-        // --- PREDICTION SUBMISSION ---
-        document.getElementById("prediction-form").addEventListener("submit", async (event) => {
-            event.preventDefault(); 
-            predictButton.disabled = true;
-            predictButton.innerText = "Predicting...";
-            resultText.innerText = "Predicting...";
-            resultText.classList.remove('hidden');
-            analysisButton.classList.add('hidden'); 
-
-            const formData = new FormData(event.target);
-            const data = {
-                latitude: parseFloat(formData.get("latitude")),
-                longitude: parseFloat(formData.get("longitude")),
-                Area: parseFloat(formData.get("Area")),
-                Bedrooms: parseInt(formData.get("Bedrooms")),
-                Bathrooms: parseInt(formData.get("Bathrooms"))
-            };
-
-            try {
-                const response = await fetch("/predict", {
-                    method: "POST",
-                    // NOTE: Your backend app.py expects a JSON body (application/json)
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                
-                // Assuming your API returns 'predicted_price_in_lakhs'
-                const priceInLakhs = result.predicted_price_in_lakhs || 45.0; // Fallback value for testing
-                
-                const priceString = formatPrice(priceInLakhs);
-                const displayString = `Predicted Price: ${priceString}`;
-                
-                resultText.innerText = displayString;
-
-                // Store result for the analysis button and chat context
-                lastPrediction = { price: priceInLakhs, data: data, formattedPrice: priceString };
-
-                // Show the analysis button and set chat context
-                analysisButton.classList.remove('hidden');
-                sessionStorage.setItem("predicted_price", displayString);
-                sessionStorage.setItem("predicted_features", JSON.stringify(data));
-                
-            } catch (error) {
-                resultText.innerText = "Error: Failed to fetch prediction.";
-                console.error("Prediction error:", error);
-            } finally {
-                predictButton.disabled = false;
-                predictButton.innerText = "Predict Price";
-            }
+        // Toggle theme on click
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.contains('dark');
+            applyTheme(!isDark);
         });
-
-
-        // --- MISTRAL ANALYSIS LOGIC (Used for /analyze_property endpoint) ---
-        analysisButton.addEventListener('click', async () => {
-            if (!lastPrediction.price) {
-                // Since alert() is forbidden, using a console log and visual feedback
-                resultText.innerText = "Error: Please make a prediction first.";
-                resultText.classList.remove('text-green-700', 'dark:text-green-400');
-                resultText.classList.add('text-red-600');
-                return;
-            }
-
-            analysisModal.classList.remove('hidden');
-            analysisContent.innerText = '';
-            analysisLoading.classList.remove('hidden');
-            analysisButton.disabled = true;
-
-            const payload = {
-                price: lastPrediction.price,
-                features: lastPrediction.data,
-                formatted_price: lastPrediction.formattedPrice
-            };
-
-            try {
-                const response = await fetch('/analyze_property', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorJson = await response.json();
-                    const errorText = errorJson.analysis || errorJson.detail;
-                    throw new Error(errorText || 'Server returned an unexpected error for analysis.');
-                }
-
-                const result = await response.json();
-                analysisContent.innerText = result.analysis;
-                
-            } catch (error) {
-                const displayError = error.message.includes('MISTRAL_API_KEY') || error.message.includes('Analysis') 
-                                     ? error.message 
-                                     : "Error generating analysis. Please check your Mistral API key and server console.";
-                
-                analysisContent.innerText = displayError;
-                console.error("Analysis API Error:", error);
-            } finally {
-                analysisLoading.classList.add('hidden');
-                analysisButton.disabled = false;
-            }
-        });
-
-        // --- MODAL CLOSE HANDLERS ---
-        document.getElementById('close-modal').addEventListener('click', () => { analysisModal.classList.add('hidden'); });
-        analysisModal.addEventListener('click', (e) => { if (e.target === analysisModal) { analysisModal.classList.add('hidden'); } });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !analysisModal.classList.contains('hidden')) { analysisModal.classList.add('hidden'); } });
     </script>
 </body>
 </html>
