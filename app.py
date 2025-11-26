@@ -1,41 +1,14 @@
 import os
 import numpy as np
+import pandas as pd
 import joblib
-from fastapi import FastAPI, Request, Form, Depends
+from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-from dotenv import load_dotenv
 
-# Attempt to import Mistral client libraries
+# --- Load ML Model ---
 try:
-    from mistralai.client import MistralClient
-    from mistralai.models.chat import ChatMessage
-except ImportError:
-    print("--- WARNING: Cannot import Mistral AI Client. Mistral features disabled. ---")
-    MistralClient = None
-    ChatMessage = None
-
-
-# --- Load API Key and ML Model ---
-load_dotenv()
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY") 
-
-MISTRAL_CLIENT = None
-if not MISTRAL_API_KEY:
-    print("--- FATAL ERROR: MISTRAL_API_KEY not found. Mistral features disabled. ---")
-else:
-    # Initialize Mistral Client
-    try:
-        MISTRAL_CLIENT = MistralClient(api_key=MISTRAL_API_KEY)
-    except Exception as e:
-        print(f"--- FATAL ERROR: Mistral Client initialization failed: {e} ---")
-        MISTRAL_CLIENT = None
-
-# Placeholder for ML Model Load. This will fail if house_model.pkl is missing.
-try:
-    # Load your ML model (replace with your actual model file if needed)
     MODEL = joblib.load("house_model.pkl") 
     print("--- INFO: house_model.pkl loaded successfully. ---")
 except FileNotFoundError:
@@ -47,50 +20,52 @@ except Exception as e:
 
 
 # --- Standard FastAPI Setup ---
-app = FastAPI(title="UrbanEstimator App")
+app = FastAPI(title="UrbanEstimator App - Pro ML")
 templates = Jinja2Templates(directory="templates") 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# --- Pydantic Models for Data Validation ---
-
-class ChatInput(BaseModel):
-    message: str
-    context_price: str | None = None
-    context_features: dict | None = None
-
-class PropertyAnalysisRequest(BaseModel):
-    price: float
-    features: dict
-    formatted_price: str
+# --- Helper Function: Indian Currency Formatting ---
+def format_currency(amount):
+    """Formats a number into Indian text format (Crores, Lakhs, Thousands)."""
+    try:
+        amount = int(round(amount))
+        original_amount = amount
+        
+        crores = amount // 10000000
+        amount = amount % 10000000
+        
+        lakhs = amount // 100000
+        amount = amount % 100000
+        
+        thousands = amount // 1000
+        remainder = amount % 1000
+        
+        parts = []
+        if crores > 0:
+            parts.append(f"{crores} Crore")
+        if lakhs > 0:
+            parts.append(f"{lakhs} Lakhs")
+        if thousands > 0:
+            parts.append(f"{thousands} Thousand")
+        if remainder > 0 and (crores == 0 and lakhs == 0): 
+            parts.append(f"{remainder}")
+            
+        if not parts:
+            return "Rs. 0"
+            
+        return "Rs. " + " ".join(parts) + " only"
+    except Exception as e:
+        return f"Rs. {original_amount}"
 
 
 # --- Frontend Page Routes ---
-
-# 1. Home Page (Index)
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
-async def get_home_page(request: Request):
-    """Serves the main landing page (index.html)."""
+@app.get("/", response_class=HTMLResponse)
+async def get_predictor_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# 2. Predictor Page (Map)
-@app.get("/map", response_class=HTMLResponse, include_in_schema=False)
-async def get_predictor_page(request: Request):
-    """Serves the map-based predictor interface (predictor.html)."""
-    return templates.TemplateResponse("predictor.html", {"request": request})
-
-
-# 3. Chat Page
-@app.get("/chat", response_class=HTMLResponse, include_in_schema=False)
-async def get_chat_page(request: Request):
-    """Serves the voice-enabled chat interface."""
-    return templates.TemplateResponse("chat.html", {"request": request})
-
-
 # --- API Endpoints ---
-
-# 4. Prediction API Route (Uses Form data for compatibility with HTML fetch)
 @app.post("/predict")
 async def predict_house_price(
     latitude: float = Form(...),
@@ -101,25 +76,37 @@ async def predict_house_price(
 ):
     """Accepts house features and returns a price prediction."""
     
+    # --- CRITICAL UPDATE FOR PRO MODEL ---
+    # We must calculate the 6th feature (Bath_Bed_Ratio) that the model expects.
+    # Avoid division by zero if bedrooms is 0.
+    bath_bed_ratio = Bathrooms / Bedrooms if Bedrooms > 0 else 0
+    
+    # Input array now has 6 columns
     input_data = np.array([[
         latitude, 
         longitude, 
         Area, 
         Bedrooms, 
-        Bathrooms
+        Bathrooms,
+        bath_bed_ratio  # <--- The new engineered feature
     ]])
+
+    raw_price = 0
 
     if MODEL:
         try:
-            # Use the loaded model for prediction
-            prediction_inr = MODEL.predict(input_data)[0]
-            prediction_in_lakhs = prediction_inr / 100000.0
+            # Predict raw price (in Rupees)
+            raw_price = MODEL.predict(input_data)[0]
         except Exception as e:
             print(f"--- ML Prediction Error: {e} ---")
-            prediction_in_lakhs = (Area * 0.01) + (Bedrooms * 5) + (Bathrooms * 2) # Fallback
+            # Fallback logic
+            raw_price = (Area * 5000) + (Bedrooms * 500000) + (Bathrooms * 200000)
     else:
-        # Fallback Placeholder Logic (used if model failed to load)
-        prediction_in_lakhs = (Area * 0.01) + (Bedrooms * 5) + (Bathrooms * 2) 
+        # Fallback Placeholder Logic
+        raw_price = (Area * 5000) + (Bedrooms * 500000) + (Bathrooms * 200000)
+
+    # Format the price using the helper function
+    formatted_text = format_currency(raw_price)
 
     return {
         "status": "success",
@@ -130,101 +117,5 @@ async def predict_house_price(
             "Bedrooms": Bedrooms,
             "Bathrooms": Bathrooms
         },
-        "predicted_price_in_lakhs": round(prediction_in_lakhs, 2)
+        "predicted_price_text": formatted_text
     }
-
-
-# 5. Chat Processing Route (Mistral AI)
-@app.post("/chat")
-def handle_chat(chat_request: ChatInput):
-    """Handles chat messages with RAG context using Mistral AI."""
-    
-    system_prompt = f"""
-    You are a polite, expert real estate AI assistant for the Indian market.
-    Your knowledge comes from a machine learning model.
-    
-    Here is the CURRENT CONTEXT from the user's prediction (if any):
-    - Predicted Price: {chat_request.context_price}
-    - Property Features: {chat_request.context_features}
-    
-    Use this context to answer the user's question concisely. If the context is empty, respond with friendly, general information about local real estate trends or invite them to use the Predictor page.
-    """
-    
-    if not MISTRAL_CLIENT:
-        return {"response": "Sorry, the AI assistant is offline. Please check the server's MISTRAL_API_KEY."}
-
-    # Prepare messages
-    messages = []
-    if ChatMessage:
-        messages = [
-            ChatMessage(role="system", content=system_prompt),
-            ChatMessage(role="user", content=chat_request.message)
-        ]
-    else:
-        # Fallback to dictionary format if ChatMessage class is unavailable
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": chat_request.message}
-        ]
-
-    # Use Mistral
-    try:
-        response = MISTRAL_CLIENT.chat(
-            model="mistral-tiny", # Fast model for conversation
-            messages=messages
-        )
-        return {"response": response.choices[0].message.content}
-        
-    except Exception as e:
-        print(f"--- Mistral Chat API Error ---: {e}")
-        return {"response": "Sorry, I'm having trouble connecting to my brain right now. Please check my API key or try again in a moment."}
-
-
-# 6. Analysis API Route (Mistral AI)
-@app.post("/analyze_property")
-def analyze_property(req: PropertyAnalysisRequest):
-    """Analyzes property investment potential using Mistral AI."""
-
-    if not MISTRAL_CLIENT:
-        return {"analysis": "Investment analysis is unavailable. Please check the server's MISTRAL_API_KEY."}
-
-    features = req.features
-    
-    # Use Mistral for detailed analysis
-    system_prompt = """
-    You are a professional real estate investment analyst. Your task is to provide a concise, balanced analysis (in exactly 3 bullet points) of the property data provided below. Focus on market valuation, potential risks, and investment class (e.g., luxury, starter home). Do not use placeholders (N/A) in the final response.
-    """
-    
-    user_prompt = f"""
-    Analyze this property for investment potential:
-    - Predicted Price: {req.formatted_price}
-    - Area: {features.get('Area', 'Unknown')} sq. ft.
-    - Bedrooms: {features.get('Bedrooms', 'Unknown')} BHK
-    - Bathrooms: {features.get('Bathrooms', 'Unknown')}
-    - Location: Latitude {features.get('latitude', 'Unknown')}, Longitude {features.get('longitude', 'Unknown')}
-    
-    Provide your analysis now using exactly three bullet points.
-    """
-    
-    # Prepare messages
-    if ChatMessage:
-        messages = [
-            ChatMessage(role="system", content=system_prompt),
-            ChatMessage(role="user", content=user_prompt)
-        ]
-    else:
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
-
-    try:
-        response = MISTRAL_CLIENT.chat(
-            model="mistral-medium", # More capable model for detailed analysis
-            messages=messages
-        )
-        return {"analysis": response.choices[0].message.content}
-        
-    except Exception as e:
-        print(f"--- Mistral Analysis API Error ---: {e}")
-        return {"analysis": "Error generating investment insight."}

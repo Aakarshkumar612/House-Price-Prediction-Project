@@ -1,53 +1,95 @@
-# House-Price-Prediction-Project 
+🏡 UrbanEstimator - AI-Powered Real Estate Valuation
 
-# 🏠 AI-Powered House Price Predictor 
+UrbanEstimator is a machine learning-powered web application that predicts real estate prices in New Delhi with 91% accuracy. It uses a Random Forest Regressor trained on 7,000+ property listings to provide instant valuations based on location, area, and amenities.
 
-This is a full-stack web application that predicts house prices in Delhi using a machine learning model and features an interactive map and an AI chatbot assistant.
+🌟 Features
 
-## ✨ Features
+High-Accuracy Model: Trained on real market data using Random Forest Regression.
 
-* **Interactive Map:** Uses Leaflet.js to select a location and get its latitude/longitude.
-* **ML Model:** A Random Forest model (trained on Delhi housing data) predicts the price in Lakhs.
-* **FastAPI Backend:** A high-performance Python backend serves the model and chat logic.
-* **RAG AI Chatbot:** A dedicated chat page powered by the Mistral AI API provides context-aware answers about predictions and the market.
+Interactive Map: Drag-and-drop pin selection using Leaflet.js to capture precise Latitude/Longitude.
 
-## 🛠️ Tech Stack
+Smart Feature Engineering: Automatically calculates Bath-to-Bed Ratio to assess luxury levels.
 
-* **Frontend:** HTML, CSS, JavaScript, Leaflet.js
-* **Backend:** Python, FastAPI, Uvicorn
-* **Machine Learning:** Scikit-learn, Pandas, Joblib
-* **AI:** Mistral AI, Pydantic, python-dotenv
+Indian Currency Formatting: Automatically formats large numbers into Crores and Lakhs (e.g., "Rs. 2 Crore 50 Lakhs").
 
-## 🚀 How to Run This Project
+Modern UI: Dark-themed, responsive interface.
 
-1.  **Clone the repository (or download the ZIP):**
-    ```bash
-    git clone [https://github.com/YOUR_USERNAME/House-Price-Project.git](https://github.com/YOUR_USERNAME/House-Price-Project.git)
-    cd House-Price-Project
-    ```
+📸 Screenshots
 
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-    ```
+(![alt text](image.png), ![alt text](image-1.png))
 
-3.  **Install the dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+Landing Page
 
-4.  **Create your `.env` file:**
-    Create a file named `.env` and add your Mistral API key:
-    ```
-    MISTRAL_API_KEY=YOUR_API_KEY_GOES_HERE
-    ```
+Prediction Result
 
-5.  **Run the server:**
-    ```bash
-    uvicorn app:app --reload
-    ```
+<img src="static/screenshot1.png" alt="Home Page" width="400">
 
-6.  **Open the app:**
-    Go to `http://127.0.0.1:8000` in your browser.
->>>>>>> 1b6fb42 (Initial commit: Full project setup with ML model, FastAPI, and AI chatbot)
+<img src="static/screenshot2.png" alt="Result" width="400">
+
+🛠️ Tech Stack
+
+Frontend: HTML5, CSS3, JavaScript, Leaflet.js (Maps)
+
+Backend: Python, FastAPI, Uvicorn
+
+Machine Learning: Scikit-Learn, Pandas, NumPy, Joblib
+
+Algorithm: Random Forest Regressor (R2 Score: 0.91)
+
+🚀 Installation & Setup
+
+1. Clone the Repository
+
+git clone [https://github.com/YourUsername/UrbanEstimator.git](https://github.com/YourUsername/UrbanEstimator.git)
+cd UrbanEstimator
+
+
+2. Create Virtual Environment
+
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Mac/Linux
+source .venv/bin/activate
+
+
+3. Install Dependencies
+
+pip install -r requirements.txt
+
+
+4. Run the Application
+
+uvicorn app:app --reload
+
+
+Open your browser at http://127.0.0.1:8000
+
+🧠 Model Training
+
+To retrain the model with new data:
+
+Place your dataset as house_data.csv in the root folder.
+
+Run the training pipeline:
+
+python train_model.py
+
+
+This performs Data Cleaning, Outlier Removal, Feature Engineering, and Grid Search tuning before saving the new house_model.pkl.
+
+🤝 Contributing
+
+Fork the Project
+
+Create your Feature Branch (git checkout -b feature/AmazingFeature)
+
+Commit your Changes (git commit -m 'Add some AmazingFeature')
+
+Push to the Branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📜 License
+
+Distributed under the MIT License. See LICENSE for more information.
