@@ -1,13 +1,42 @@
-# Ignore the virtual environment
-.venv/
+--- Virtual Environments ---
 
-# Ignore the secret API keys file
+.venv/
+venv/
+env/
+ENV/
+
+--- Environment Variables & Secrets ---
+
 .env
 
-# Ignore Python cache files
-__pycache__/
-*.pyc
+--- Python Cache & Compilation ---
 
-# Ignore OS-specific files
+pycache/
+*.pyc
+*.pyo
+*.pyd
+
+--- Jupyter Notebooks ---
+
+.ipynb_checkpoints/
+
+--- IDE Settings (VS Code, PyCharm, etc.) ---
+
+.vscode/
+.idea/
+
+--- OS Generated Files ---
+
 .DS_Store
 Thumbs.db
+
+--- Logs & Databases ---
+
+*.log
+*.sqlite
+
+--- Python Build Artifacts (if you package the app later) ---
+
+build/
+dist/
+*.egg-info/

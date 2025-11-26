@@ -14,18 +14,6 @@ Indian Currency Formatting: Automatically formats large numbers into Crores and 
 
 Modern UI: Dark-themed, responsive interface.
 
-📸 Screenshots
-
-(![alt text](image.png), ![alt text](image-1.png))
-
-Landing Page
-
-Prediction Result
-
-<img src="static/screenshot1.png" alt="Home Page" width="400">
-
-<img src="static/screenshot2.png" alt="Result" width="400">
-
 🛠️ Tech Stack
 
 Frontend: HTML5, CSS3, JavaScript, Leaflet.js (Maps)
@@ -34,14 +22,18 @@ Backend: Python, FastAPI, Uvicorn
 
 Machine Learning: Scikit-Learn, Pandas, NumPy, Joblib
 
+DevOps: Docker
+
 Algorithm: Random Forest Regressor (R2 Score: 0.91)
 
 🚀 Installation & Setup
 
+Option 1: Standard Installation
+
 1. Clone the Repository
 
-git clone [https://github.com/YourUsername/UrbanEstimator.git](https://github.com/YourUsername/UrbanEstimator.git)
-cd UrbanEstimator
+git clone [https://github.com/Aakarshkumar612/House-Price-Prediction-Project.git](https://github.com/Aakarshkumar612/House-Price-Prediction-Project.git)
+cd House-Price-Prediction-Project
 
 
 2. Create Virtual Environment
@@ -64,6 +56,19 @@ uvicorn app:app --reload
 
 
 Open your browser at http://127.0.0.1:8000
+
+Option 2: Run with Docker 🐳
+
+If you have Docker installed, you can run the app without installing Python or libraries manually.
+
+# 1. Build the image
+docker build -t urban-estimator .
+
+# 2. Run the container
+docker run -p 8000:8000 urban-estimator
+
+
+The app will be live at http://localhost:8000.
 
 🧠 Model Training
 
