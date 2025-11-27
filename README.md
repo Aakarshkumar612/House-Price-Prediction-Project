@@ -2,6 +2,8 @@
 
 UrbanEstimator is a machine learning-powered web application that predicts real estate prices in New Delhi with 91% accuracy. It uses a Random Forest Regressor trained on 7,000+ property listings to provide instant valuations based on location, area, and amenities.
 
+🚀 Live Application: https://house-price-prediction-project-sxyf.onrender.com
+
 🌟 Features
 
 High-Accuracy Model: Trained on real market data using Random Forest Regression.
